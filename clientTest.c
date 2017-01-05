@@ -360,7 +360,5 @@ int main(int argc, char *argv[]){
 
     close(s);
 
-
-  	//printf("0x%0*x\n", size == I2C_SMBUS_WORD_DATA ? 4 : 2, res);
 	return 0;
 }

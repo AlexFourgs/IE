@@ -35,8 +35,10 @@ int main(void){
 
   FILE *fichier=NULL;
   struct timeval start,checkpoint;
-  int accX=0;
-
+  int accX=0,tempAcc=0;
+  int acc[2]={0,0};
+  int vel[2]={0,0};
+  int pos[2]={0,0};
   int received_packet = 0 ;
   int echeance, packet_envoye, task_period, task_deadline ;
   echeance = packet_envoye = task_period = task_deadline = 0 ;
@@ -50,12 +52,12 @@ int main(void){
     diep("socket");
   }
 
-  /*fichier = fopen("save","w+");
+  fichier = fopen("save","w+");
 
   if(fichier==NULL){
     printf("Error can't open or create file  \n");
     exit(1);
-}*/
+}
 
 
   memset((char *) &si_me, 0, sizeof(si_me));
@@ -67,7 +69,7 @@ int main(void){
     diep("bind");
 
     gettimeofday(&start, 0);
-
+ //printf("start: %d \n",start.tv_sec, start.tv_usec);
   while (strcmp(buf,"9999") != 0) {
     if (recvfrom(s, buf, BUFLEN, 0, &si_other, &slen)==-1){
 	     diep("recvfrom()");
@@ -114,8 +116,31 @@ int main(void){
         accX=accX-255;
       }
       gettimeofday(&checkpoint, 0);
-      //fprintf(fichier,"%d %d\n",checkpoint.tv_usec, accX);
-      printf("Accelero : %d %d\n",checkpoint.tv_sec,accX);
+      
+      	if(accX>=-4 && accX<=4){
+			accX=0;
+		}
+      
+		if (tempAcc=1){
+			acc[1]=accX;
+			tempAcc=0;
+		}
+		else if(tempAcc=0){
+			acc[0]=accX;
+			tempAcc=1;
+		}
+		
+		vel[1]=vel[0]+acc[0]+((acc[1]-acc[0])>>1);
+		pos[1]=pos[0]+vel[0]+((vel[1]-vel[0])>>1);
+		
+		vel[0]=vel[1];
+		pos[0]=pos[1];
+		printf("Values : %d %d %d %d %d %d\n",((checkpoint.tv_sec-start.tv_sec)*1000)+((checkpoint.tv_usec-start.tv_usec)/1000),accX,vel[0],vel[1],pos[0],pos[1]);
+
+		fprintf(fichier,"%d %d %d %d %d %d\n",((checkpoint.tv_sec-start.tv_sec)*1000)+((checkpoint.tv_usec-start.tv_usec)/1000),accX,vel[0],vel[1],pos[0],pos[1]);
+		
+      //printf("Accelero : %d %d %d\n",checkpoint.tv_sec, checkpoint.tv_usec,accX);
+      
     }
   }
 
@@ -128,9 +153,9 @@ int main(void){
   printf("task_deadline = %d\n", task_deadline); // On enlève le paquet 9999
 
   printf("J'ai reçu %d packet\n", received_packet-3); // On enlève le paquet 9999
-  //add_data_csv(task_period, task_deadline, packet_envoye, received_packet-3, echeance);
+  add_data_csv(task_period, task_deadline, packet_envoye, received_packet-3, echeance);
 
-  //fclose(fichier);
+  fclose(fichier);
 
   close(s);
   return 0;
