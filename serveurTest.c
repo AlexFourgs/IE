@@ -16,7 +16,6 @@ void diep(char *s){
   exit(1);
 }
 
-<<<<<<< HEAD
 /**
     Fonction qui écrit les données de la connexion (nombre de paquet envoyé, période, etc...), et les écrit dans un fichier .csv
 **/
@@ -37,10 +36,7 @@ int main(void){
   FILE *fichier=NULL;
   struct timeval start,checkpoint;
   int accX=0;
-=======
-int main(void){
 
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
   int received_packet = 0 ;
   int echeance, packet_envoye, task_period, task_deadline ;
   echeance = packet_envoye = task_period = task_deadline = 0 ;
@@ -49,15 +45,11 @@ int main(void){
   int s, i, slen=sizeof(si_other);
   char buf[BUFLEN];
   char* p;
-<<<<<<< HEAD
 
-=======
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
   if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1){
     diep("socket");
   }
 
-<<<<<<< HEAD
   /*fichier = fopen("save","w+");
 
   if(fichier==NULL){
@@ -65,8 +57,7 @@ int main(void){
     exit(1);
 }*/
 
-=======
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
+
   memset((char *) &si_me, 0, sizeof(si_me));
   si_me.sin_family = AF_INET;
   si_me.sin_port = htons(PORT);
@@ -75,26 +66,17 @@ int main(void){
   if (bind(s, &si_me, sizeof(si_me))==-1)
     diep("bind");
 
-<<<<<<< HEAD
     gettimeofday(&start, 0);
 
-=======
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
   while (strcmp(buf,"9999") != 0) {
     if (recvfrom(s, buf, BUFLEN, 0, &si_other, &slen)==-1){
 	     diep("recvfrom()");
     }
     received_packet++ ;
-<<<<<<< HEAD
     //printf("Data: %s\n\n", buf);
 
     p=strtok(buf,",");
-=======
-    printf("Data: %s\n\n", buf);
 
-    p=strtok(buf,",");
-    printf("avant = %s\n", p);
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
     if(strcmp(p,"2")==0){
       while (p!=NULL){
         if(j==1){
@@ -121,7 +103,6 @@ int main(void){
         p = strtok(NULL, ",");
       }
     }
-<<<<<<< HEAD
     else if (strcmp(p,"3")==0){
       while(p!=NULL){
         accX=atoi(p);
@@ -139,24 +120,18 @@ int main(void){
   }
 
   printf("Il y a eu %d echeance(s) manquée(s)\n", echeance); // On enlève le paquet 9999
-=======
-  }
+  
 
   printf("Il y a eu %d echeances\n", echeance); // On enlève le paquet 9999
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
   printf("Le gumstix envoie %d packet\n", packet_envoye); // On enlève le paquet 9999
   printf("task_period = %d\n", task_period); // On enlève le paquet 9999
   printf("task_deadline = %d\n", task_deadline); // On enlève le paquet 9999
 
   printf("J'ai reçu %d packet\n", received_packet-3); // On enlève le paquet 9999
-<<<<<<< HEAD
-  add_data_csv(task_period, task_deadline, packet_envoye, received_packet-3, echeance);
+  //add_data_csv(task_period, task_deadline, packet_envoye, received_packet-3, echeance);
 
   //fclose(fichier);
-  //close(s);
-=======
 
   close(s);
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
   return 0;
 }

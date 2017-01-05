@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 #include <arpa/inet.h>
-=======
-include <arpa/inet.h>
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
 #include <netinet/in.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -11,11 +7,8 @@ include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
-<<<<<<< HEAD
 #include <errno.h>
 #include <string.h>
-=======
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
 #include "I2C/i2c-dev.h"
 #include "I2C/i2cbusses.h"
 #include "I2C/util.h"
@@ -24,12 +17,9 @@ include <arpa/inet.h>
 #define PORT 9930
 
 
-<<<<<<< HEAD
-=======
 #define TASK_PERIOD 100000 /* période de la tâche en microsecondes*/ // Plus TASK_PERIOD est haut, plus l'envoi de paquet sera lent. (1000000 = 1s)
 #define TASK_DEADLINE 10000 /* depassement autorisé*/
 
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
 void diep(char *s)
 {
   perror(s);
@@ -37,19 +27,9 @@ void diep(char *s)
 }
 
 
-<<<<<<< HEAD
 #define SRV_IP "192.168.10.2"
 /* diep(), #includes and #defines like in the server */
 
-
-
-static void help(void) __attribute__ ((noreturn));
-
-static void help(void){
-  	fprintf(stderr, "Usage: i2cget [-f] [-y] I2CBUS CHIP-ADDRESS [DATA-ADDRESS [MODE]]\n"
-=======
-  #define SRV_IP "192.168.10.2"
-  /* diep(), #includes and #defines like in the server */
 
 
 
@@ -59,7 +39,6 @@ static void help(void){
   {
   	fprintf(stderr,
   		"Usage: i2cget [-f] [-y] I2CBUS CHIP-ADDRESS [DATA-ADDRESS [MODE]]\n"
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
   		"  I2CBUS is an integer or an I2C bus name\n"
   		"  ADDRESS is an integer (0x03 - 0x77)\n"
   		"  MODE is one of:\n"
@@ -68,16 +47,11 @@ static void help(void){
   		"    c (write byte/read byte)\n"
   		"    Append p for SMBus PEC\n");
   	exit(1);
-<<<<<<< HEAD
 }
 
-static int check_funcs(int file, int size, int daddress, int pec){
-=======
-  }
 
   static int check_funcs(int file, int size, int daddress, int pec)
   {
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
   	unsigned long funcs;
 
   	/* check adapter functionality */
@@ -88,7 +62,6 @@ static int check_funcs(int file, int size, int daddress, int pec){
   	}
 
   	switch (size) {
-<<<<<<< HEAD
       case I2C_SMBUS_BYTE:
   		  if (!(funcs & I2C_FUNC_SMBUS_READ_BYTE)) {
   		      fprintf(stderr, MISSING_FUNC_FMT, "SMBus receive byte");
@@ -122,43 +95,7 @@ static int check_funcs(int file, int size, int daddress, int pec){
 
   return 0;
 }
-=======
-  	case I2C_SMBUS_BYTE:
-  		if (!(funcs & I2C_FUNC_SMBUS_READ_BYTE)) {
-  			fprintf(stderr, MISSING_FUNC_FMT, "SMBus receive byte");
-  			return -1;
-  		}
-  		if (daddress >= 0
-  		 && !(funcs & I2C_FUNC_SMBUS_WRITE_BYTE)) {
-  			fprintf(stderr, MISSING_FUNC_FMT, "SMBus send byte");
-  			return -1;
-  		}
-  		break;
 
-  	case I2C_SMBUS_BYTE_DATA:
-  		if (!(funcs & I2C_FUNC_SMBUS_READ_BYTE_DATA)) {
-  			fprintf(stderr, MISSING_FUNC_FMT, "SMBus read byte");
-  			return -1;
-  		}
-  		break;
-
-  	case I2C_SMBUS_WORD_DATA:
-  		if (!(funcs & I2C_FUNC_SMBUS_READ_WORD_DATA)) {
-  			fprintf(stderr, MISSING_FUNC_FMT, "SMBus read word");
-  			return -1;
-  		}
-  		break;
-  	}
-
-  	if (pec
-  	 && !(funcs & (I2C_FUNC_SMBUS_PEC | I2C_FUNC_I2C))) {
-  		fprintf(stderr, "Warning: Adapter does "
-  			"not seem to support PEC\n");
-  	}
-
-  	return 0;
-  }
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
 
   static int confirm(const char *filename, int address, int size, int daddress,
   		   int pec)
@@ -279,12 +216,9 @@ static int check_funcs(int file, int size, int daddress, int pec){
   		exit(0);
 
   	if (pec && ioctl(file, I2C_PEC, 1) < 0) {
-<<<<<<< HEAD
   		fprintf(stderr, "Error: Could not set PEC: %s\n", strerror(errno));
-=======
   		fprintf(stderr, "Error: Could not set PEC: %s\n",
   			strerror(errno));
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
   		close(file);
   		exit(1);
   	}
@@ -311,7 +245,6 @@ static int check_funcs(int file, int size, int daddress, int pec){
   		exit(2);
   	}
 
-<<<<<<< HEAD
   	//printf("0x%0*x\n", size == I2C_SMBUS_WORD_DATA ? 4 : 2, res);
 
   	return res;
@@ -427,85 +360,7 @@ int main(int argc, char *argv[]){
 
     close(s);
 
+
+  	//printf("0x%0*x\n", size == I2C_SMBUS_WORD_DATA ? 4 : 2, res);
 	return 0;
 }
-=======
-  	printf("0x%0*x\n", size == I2C_SMBUS_WORD_DATA ? 4 : 2, res);
-
-  	return 1 ;
-  }
-
-
- int main(void)
-  {
-
-    struct timeval start,checkpoint;
-    long long diff;
-
-      struct sockaddr_in si_other;
-      int s, slen=sizeof(si_other);
-      char buf[BUFLEN];
-      int val1,val2,val3;
-      int tmp = 0;
-
-      val1=val2=val3=4;
-
-           if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
-             diep("socket");
-
-          memset((char *) &si_other, 0, sizeof(si_other));
-        si_other.sin_family = AF_INET;
-        si_other.sin_port = htons(PORT);
-        if (inet_aton(SRV_IP, &si_other.sin_addr)==0) {
-           fprintf(stderr, "inet_aton() failed\n");
-           exit(1);
-          }
-
-	/* on récupère le temps avant de rentrer dans la boucle*/
-          gettimeofday(&start, 0);
-
-          while (tmp < 100) {
-
-
-	    /*mesure du temps écoulé depuis le dernier passage ici- attention section critique possible- */
-           gettimeofday(&checkpoint, 0);
-	   diff=(checkpoint.tv_sec-start.tv_sec) * 1000000L + (checkpoint.tv_usec-start.tv_usec);
-	   if (diff < TASK_PERIOD ) ; /* On cadence l'execution toutes les TASK_PERIOD*/
-	   else {
-	     gettimeofday(&start, 0); /* On réinitialise le compteur */
-	     printf("temps écoulé=%lld usec\n",diff);
-	     if (diff > TASK_PERIOD + TASK_DEADLINE) printf ("***echeance manquée \n"); /* si la condition temps réelle n'est pas respectée */
-	     else {  /*si la condition temps réel est respectée*/
-
-	       /*envoi des informations*/
-	       sprintf(buf, "%d %d %d\n", val1,val2,val3);
-
-         i2cget_ntm(6, {"i2cget_ntm", "-f", "-y", "3", "0x1d", "0x29"});
-
-         if (sendto(s, buf, BUFLEN, 0, &si_other, slen)==-1)
-		 diep("sendto()");
-
-	       /* changement des informations (simul*/
-	       tmp++;
-	       if (tmp ==254) tmp=0;
-	       val1=val2=val3=tmp;
-	     }
-
-	   }
-	  }
-
-    int val4 = 9999 ;
-    sprintf(buf, "%d", val4);
-    if (sendto(s, buf, BUFLEN, 0, &si_other, slen)==-1){
-      diep("sendto()");
-    }
-    close(s);
-
-    
-
-
-    printf("J'ai compilé");
-
-	  return 0;
-  }
->>>>>>> bce6826fae24f566fc6c29ad5687f225bf5911eb
