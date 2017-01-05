@@ -2,14 +2,16 @@
 
 ## Introduction
 
+<img src="https://github.com/AlexFourgs/IE/raw/master/RapportSceance/gumstix.jpg" width="300">
+
 Le projet "Gumstix" a été réalisé au cours de notre première année de Master d'Informatique et Ingénierie des Systèmes Complexes pour le cours d'Informatique Embarqué encadré par M. Pierre Andry.
-Le but de ce projet était d'aborder les notions de temps réél en informatique embarqué sur un Gumstix. Le sujet était de mettre en place une communication UDP entre le Gumstix et un serveur (ordinateur) servant à envoyé les données récoltés par les accéléromètres du Gumstix.
+Le but de ce projet était d'aborder les notions de temps réél en informatique embarqué sur un Gumstix. Le sujet était de mettre en place une communication UDP entre le Gumstix et un serveur (ordinateur) servant à envoyer les données récoltées par les accéléromètres du Gumstix.
 
 ## Étude de la connexion UDP
 
 *Afin d'éviter de surcharger le document avec des informations "inutiles", on ne précisera pas les étapes préliminaires comme la configuration du Gumstix et du serveur*
 
-Le Gumstix est configuré pour envoyé les données à une certaines cadence tout en ayant une contrainte de temps (deadline) à ne pas dépasser. Si cette contrainte de temps est dépasser, on parle d'une échéance manquée, et la donnée n'est donc pas exploitable puisqu'envoyer "en retard".
+Le Gumstix est configuré pour envoyé les données à une certaine cadence tout en ayant une contrainte de temps (deadline) à ne pas dépasser. Si cette contrainte de temps est dépassée, on parle d'une échéance manquée, et la donnée n'est donc pas exploitable puisqu'envoyer "en retard".
 
 ### Rappel temps réél mou et temps réél dur
 
@@ -22,18 +24,32 @@ Le Gumstix est configuré pour envoyé les données à une certaines cadence tou
 
 ### Protocole
 
-Nous avons étudier la "qualité" de la connexion afin de déterminer les limites du Gumstix en terme de cadences et échéances.
-Les échéances sont proportionnelle à la cadence.
+Nous avons étudié la "qualité" de la connexion afin de déterminer les limites du Gumstix en matière de cadences et échéances.
+Les échéances sont proportionnelles à la cadence.
 
 échéance = cadence/10
 
-Pour tester le Gumstix nous avons donc augmenter la cadence d'envois des données palier par palier tout en baissant la deadline. Côté serveur, les derniers paquets reçus permettent de récolter les informations sur la configuration mise en place sur le Gumstix :
+Pour tester le Gumstix nous avons donc augmenté la cadence d'envois des données palier par palier tout en baissant la deadline. Côté serveur, les derniers paquets reçus permettent de récolter les informations sur la configuration mise en place sur le Gumstix :
 * cadence
 * valeur de l'échéance
 * échéance(s) manquée(s)
 * nombre de paquet envoyées
 
-Le serveur compte le nombre de paquet reçus aussi.
+Le serveur compte le nombre de paquet reçu aussi.
 
 Voici les résultats obtenus :
+
+courbe
+
+Commentaires sur la courbe
+
+### Conclusion
+
+
+
+## Récupération de la position du Gumstix
+
+### Principe
+
+Le Gumstix est équipé de trois accéléromètres pour chaque axes (X, Y, Z).
 
