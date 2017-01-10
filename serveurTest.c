@@ -47,6 +47,7 @@ int main(void){
   int s, i, slen=sizeof(si_other);
   char buf[BUFLEN];
   char* p;
+  long long time_s, time_us, actual_time_s, actual_time_us;
 
   if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1){
     diep("socket");
@@ -79,7 +80,9 @@ int main(void){
 
     p=strtok(buf,",");
 
+    // Réception configuration connexion (period, deadline, nb paquet)
     if(strcmp(p,"2")==0){
+      j=0;
       while (p!=NULL){
         if(j==1){
           printf("%s\n", p);
@@ -99,28 +102,61 @@ int main(void){
         p = strtok(NULL, ",");
       }
     }
+    // Réception nb échéance(s) manquée(s)
     else if(strcmp(p,"1")==0){
       while (p!=NULL){
         echeance = atoi(p) ;
         p = strtok(NULL, ",");
       }
     }
+    // Réception donnée accX
     else if (strcmp(p,"3")==0){
-      while(p!=NULL){
-        accX=atoi(p);
-        p=strtok(NULL,",");
+        j=0;
+        while (p!=NULL){
+          if(j==1){
+            printf("%s\n", p);
+            accX = atoi(p) ;
+          }
+          else if(j == 2){
+            //printf("%s\n", p);
+            //printf("%s\n", p);
+            actual_time_s = atoll(p) ;
+          }
+          else if(j == 3){
+            //printf("%s\n", p);
+            //printf("%s\n", p);
+            actual_time_us = atoll(p) ;
+            printf("diff = %lld\n",(actual_time_s-time_s));
+          }
+          j++;
+          p = strtok(NULL, ",");
+       }
+    }
+    else if (strcmp(p,"4")==0){
+        j=0;
+        while (p!=NULL){
+          if(j==1){
+            //printf("%s\n", p);
+            time_s = atoll(p) ;
+          }
+          else if(j == 2){
+            //printf("%s\n", p);
+            time_us = atoll(p) ;
+          }
+          j++;
+          p = strtok(NULL, ",");
       }
-
+    }
       // Négatif
       if (accX>127){
         accX=accX-255;
       }
       gettimeofday(&checkpoint, 0);
-      
+
       	if(accX>=-4 && accX<=4){
 			accX=0;
 		}
-      
+
 		if (tempAcc=1){
 			acc[1]=accX;
 			tempAcc=0;
@@ -129,30 +165,27 @@ int main(void){
 			acc[0]=accX;
 			tempAcc=1;
 		}
-		
+
 		vel[1]=vel[0]+acc[0]+((acc[1]-acc[0])>>1);
 		pos[1]=pos[0]+vel[0]+((vel[1]-vel[0])>>1);
-		
+
 		vel[0]=vel[1];
 		pos[0]=pos[1];
 		printf("Values : %d %d %d %d %d %d\n",((checkpoint.tv_sec-start.tv_sec)*1000)+((checkpoint.tv_usec-start.tv_usec)/1000),accX,vel[0],vel[1],pos[0],pos[1]);
 
 		fprintf(fichier,"%d %d %d %d %d %d\n",((checkpoint.tv_sec-start.tv_sec)*1000)+((checkpoint.tv_usec-start.tv_usec)/1000),accX,vel[0],vel[1],pos[0],pos[1]);
-		
+
       //printf("Accelero : %d %d %d\n",checkpoint.tv_sec, checkpoint.tv_usec,accX);
-      
+
     }
-  }
 
+  printf("time_s = %lld, time_us = %lld\n", time_s, time_us);
   printf("Il y a eu %d echeance(s) manquée(s)\n", echeance); // On enlève le paquet 9999
-  
-
-  printf("Il y a eu %d echeances\n", echeance); // On enlève le paquet 9999
   printf("Le gumstix envoie %d packet\n", packet_envoye); // On enlève le paquet 9999
   printf("task_period = %d\n", task_period); // On enlève le paquet 9999
   printf("task_deadline = %d\n", task_deadline); // On enlève le paquet 9999
 
-  printf("J'ai reçu %d packet\n", received_packet-3); // On enlève le paquet 9999
+  printf("J'ai reçu %d packet\n", received_packet-4); // On enlève le paquet 9999
   add_data_csv(task_period, task_deadline, packet_envoye, received_packet-3, echeance);
 
   fclose(fichier);

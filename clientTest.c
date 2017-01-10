@@ -263,7 +263,7 @@ int main(int argc, char *argv[]){
     int echeance_manque = 0 ;
 
 
-    struct timeval start,checkpoint;
+    struct timeval start,checkpoint,sending,checkpoint_sending;
     long long diff;
     struct sockaddr_in si_other;
     int s, slen=sizeof(si_other);
@@ -277,6 +277,7 @@ int main(int argc, char *argv[]){
         stop_connection = atoi(argv[4]);
     }
 
+    // accélérometre
     char* paramX[6] = {"i2cget_ntm", "-f", "-y", "3", "0x1d", "0x29"};
     //char* paramY[6] = {"i2cget_ntm", "-f", "-y", "3", "0x1d", "0x2B"};
     //char* paramZ[6] = {"i2cget_ntm", "-f", "-y", "3", "0x1d", "0x2D"};
@@ -297,6 +298,7 @@ int main(int argc, char *argv[]){
 
 	/* on récupère le temps avant de rentrer dans la boucle*/
     gettimeofday(&start, 0);
+    gettimeofday(&sending, 0);
 
     while (tmp < packet_to_send) {
 
@@ -313,9 +315,9 @@ int main(int argc, char *argv[]){
                 printf ("***echeance manquée \n"); /* si la condition temps réelle n'est pas respectée */
             }
 	        else {  /*si la condition temps réel est respectée*/
-
+                gettimeofday(&checkpoint_sending, 0);
                 /*envoi des informations*/
-                sprintf(buf, "3,%d\n",i2cget_ntm(6, paramX));
+                sprintf(buf, "3,%d,%lld,%lld\n",i2cget_ntm(6, paramX), checkpoint_sending.tv_sec, checkpoint_sending.tv_usec);
                 printf("3,%d\n",i2cget_ntm(6, paramX));
                 //printf ("%d %d %d \n",i2cget_ntm(6, paramX),i2cget_ntm(6, paramY),i2cget_ntm(6, paramZ));
 
@@ -345,6 +347,14 @@ int main(int argc, char *argv[]){
         diep("sendto()");
     }
 
+    /*
+        On envoi l'heure de la prise de valeur.
+    */
+    sprintf(buf, "4,%lld,%lld", sending.tv_sec, sending.tv_usec);
+    printf("time_s = %lld, time_us = %lld\n", sending.tv_sec, sending.tv_usec);
+    if (sendto(s, buf, BUFLEN, 0, &si_other, slen)==-1){
+        diep("sendto()");
+    }
     /*
         Si stop_connection est différent de 0,
         on envoie le signal de fin de transmission
