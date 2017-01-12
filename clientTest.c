@@ -35,8 +35,7 @@ void diep(char *s)
 
   static void help(void) __attribute__ ((noreturn));
 
-  static void help(void)
-  {
+  static void help(void)  {
   	fprintf(stderr,
   		"Usage: i2cget [-f] [-y] I2CBUS CHIP-ADDRESS [DATA-ADDRESS [MODE]]\n"
   		"  I2CBUS is an integer or an I2C bus name\n"
@@ -47,11 +46,10 @@ void diep(char *s)
   		"    c (write byte/read byte)\n"
   		"    Append p for SMBus PEC\n");
   	exit(1);
-}
+  }
 
 
-  static int check_funcs(int file, int size, int daddress, int pec)
-  {
+  static int check_funcs(int file, int size, int daddress, int pec){
   	unsigned long funcs;
 
   	/* check adapter functionality */
@@ -66,7 +64,7 @@ void diep(char *s)
   		  if (!(funcs & I2C_FUNC_SMBUS_READ_BYTE)) {
   		      fprintf(stderr, MISSING_FUNC_FMT, "SMBus receive byte");
   			    return -1;
-        }
+          }
   		  if (daddress >= 0 && !(funcs & I2C_FUNC_SMBUS_WRITE_BYTE)) {
           fprintf(stderr, MISSING_FUNC_FMT, "SMBus send byte");
   			  return -1;
@@ -88,18 +86,16 @@ void diep(char *s)
   		break;
   	}
 
-  if (pec && !(funcs & (I2C_FUNC_SMBUS_PEC | I2C_FUNC_I2C))) {
-    fprintf(stderr, "Warning: Adapter does "
-  	"not seem to support PEC\n");
+      if (pec && !(funcs & (I2C_FUNC_SMBUS_PEC | I2C_FUNC_I2C))){
+        fprintf(stderr, "Warning: Adapter does "
+      	"not seem to support PEC\n");
+      }
+
+      return 0;
   }
 
-  return 0;
-}
 
-
-  static int confirm(const char *filename, int address, int size, int daddress,
-  		   int pec)
-  {
+  static int confirm(const char *filename, int address, int size, int daddress, int pec) {
   	int dont = 0;
 
   	fprintf(stderr, "WARNING! This program can confuse your I2C "
@@ -147,8 +143,7 @@ void diep(char *s)
   	return 1;
   }
 
-  int i2cget_ntm(int argc, char *argv[])
-  {
+  int i2cget_ntm(int argc, char *argv[])  {
   	char *end;
   	int res, i2cbus, address, size, file;
   	int daddress;
@@ -269,6 +264,9 @@ int main(int argc, char *argv[]){
     int s, slen=sizeof(si_other);
     char buf[BUFLEN];
     int tmp = 0;
+    int accX = 0;
+    float sumAccX = 0 ;
+    int i = 0 ;
 
     if(argc == 5){ // Si il y a des arguments
         task_period = atoi(argv[1]);
@@ -310,12 +308,42 @@ int main(int argc, char *argv[]){
             gettimeofday(&start, 0); /* On réinitialise le compteur */
             printf("temps écoulé=%lld usec\n",diff);
 
+            // Calculé 64 accélérations
+            gettimeofday(&sending, 0); // On récupère l'heure avant la première mesure.
+
+            for(i=0 ; i < 64 ; i++){ // On lis 64 accélération
+                accX = i2cget_ntm(6, paramX); // Lecture de l'accéléromètre
+
+                // Transformation en valeur négative pour une accélération négative.
+                if (accX>127){
+                    accX=accX-255;
+                }
+
+                // Traitement du bruit.
+                if(accX>=-4 && accX<=4){
+                    accX=0;
+                }
+
+                sumAccX = sumAccX + accX ;
+            }
+
+            // On fait la moyenne
+            sumAccX = sumAccX/64 ;
+
+            gettimeofday(&checkpoint_sending, 0); // On récupère l'heure après la dernière mesure.
+
+            // Calculer vitesse
+
+            // Calculer position
+
+            // Envoyer données au serveur
+
             if (diff > task_period + task_deadline){
                 echeance_manque++ ;
                 printf ("***echeance manquée \n"); /* si la condition temps réelle n'est pas respectée */
             }
 	        else {  /*si la condition temps réel est respectée*/
-                gettimeofday(&checkpoint_sending, 0);
+
                 /*envoi des informations*/
                 sprintf(buf, "3,%d,%lld,%lld\n",i2cget_ntm(6, paramX), checkpoint_sending.tv_sec, checkpoint_sending.tv_usec);
                 printf("3,%d\n",i2cget_ntm(6, paramX));
