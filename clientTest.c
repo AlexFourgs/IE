@@ -143,7 +143,7 @@ void diep(char *s)
   	return 1;
   }
 
-  int i2cget_ntm(int argc, char *argv[])  {
+  int i2cget(int argc, char *argv[])  {
   	char *end;
   	int res, i2cbus, address, size, file;
   	int daddress;
@@ -245,7 +245,35 @@ void diep(char *s)
   	return res;
   }
 
+  /*
+    Fonction qui récupère la valeur de l'accéléromètre z.
+    On sait que sur la terre, la gravité est égale à 9.8m/s, or l'axe z représente
+    la gravité "au repos" (lorsque le gumstix de bouge pas).
+    Donc accZ = g
 
+    Cette valeur nous permettra de calculer la vitesse.
+  */
+  float calibration(){
+      char* paramZ[6] = {"i2cget", "-f", "-y", "3", "0x1d", "0x2D"};
+      int i = 0 ;
+      int accZ = 0 ;
+      int sumAccZ = 0 ;
+      float g = 0 ;
+
+      for(i = 0 ; i < 64 ; i++){
+          accZ = i2cget(6, paramZ);
+
+          if (accZ>127){
+              accZ=accZ-255;
+          }
+
+          sumAccZ = sumAccZ + accZ ;
+      }
+
+      g = sumAccZ/64 ;
+
+      return g ;
+  }
 
 int main(int argc, char *argv[]){
     // Attributs pour le client UDP
@@ -264,9 +292,17 @@ int main(int argc, char *argv[]){
     int s, slen=sizeof(si_other);
     char buf[BUFLEN];
     int tmp = 0;
+
+
+    // Attributs pour le calcul de la vitesse / position
+    float g = 0 ;
     int accX = 0;
     float sumAccX = 0 ;
     int i = 0 ;
+    float vitesseX = 0 ;
+    float positionX = 0 ;
+
+    g = calibration();
 
     if(argc == 5){ // Si il y a des arguments
         task_period = atoi(argv[1]);
@@ -276,9 +312,9 @@ int main(int argc, char *argv[]){
     }
 
     // accélérometre
-    char* paramX[6] = {"i2cget_ntm", "-f", "-y", "3", "0x1d", "0x29"};
-    //char* paramY[6] = {"i2cget_ntm", "-f", "-y", "3", "0x1d", "0x2B"};
-    //char* paramZ[6] = {"i2cget_ntm", "-f", "-y", "3", "0x1d", "0x2D"};
+    char* paramX[6] = {"i2cget", "-f", "-y", "3", "0x1d", "0x29"};
+    //char* paramY[6] = {"i2cget", "-f", "-y", "3", "0x1d", "0x2B"};
+    //char* paramZ[6] = {"i2cget", "-f", "-y", "3", "0x1d", "0x2D"};
 
 
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1){
@@ -312,7 +348,7 @@ int main(int argc, char *argv[]){
             gettimeofday(&sending, 0); // On récupère l'heure avant la première mesure.
 
             for(i=0 ; i < 64 ; i++){ // On lis 64 accélération
-                accX = i2cget_ntm(6, paramX); // Lecture de l'accéléromètre
+                accX = i2cget(6, paramX); // Lecture de l'accéléromètre
 
                 // Transformation en valeur négative pour une accélération négative.
                 if (accX>127){
@@ -333,11 +369,15 @@ int main(int argc, char *argv[]){
             gettimeofday(&checkpoint_sending, 0); // On récupère l'heure après la dernière mesure.
 
             // Calculer vitesse
+            vitesseX = (sumAccX/g)*9.8 ;
+            //vitesseX = sumAccX/2*((checkpoint_sending.tv_sec-sending.tv_sec)*1000)+((checkpoint_sending.tv_usec-sending.tv_usec)/1000);
 
             // Calculer position
+            positionX = vitesseX*((checkpoint_sending.tv_sec-sending.tv_sec)*1000)+((checkpoint_sending.tv_usec-sending.tv_usec)/1000);
 
             // Envoyer données au serveur
 
+            // Si l'échéance est manqué on envoi pas la donnée.
             if (diff > task_period + task_deadline){
                 echeance_manque++ ;
                 printf ("***echeance manquée \n"); /* si la condition temps réelle n'est pas respectée */
@@ -345,9 +385,9 @@ int main(int argc, char *argv[]){
 	        else {  /*si la condition temps réel est respectée*/
 
                 /*envoi des informations*/
-                sprintf(buf, "3,%d,%lld,%lld\n",i2cget_ntm(6, paramX), checkpoint_sending.tv_sec, checkpoint_sending.tv_usec);
-                printf("3,%d\n",i2cget_ntm(6, paramX));
-                //printf ("%d %d %d \n",i2cget_ntm(6, paramX),i2cget_ntm(6, paramY),i2cget_ntm(6, paramZ));
+                sprintf(buf, "3,%d,%f,%f\n", accX, vitesseX, positionX);
+                printf("3, accX : %d, vitesseX : %f, positionX : %f\n", accX, vitesseX, positionX);
+                //printf ("%d %d %d \n",i2cget(6, paramX),i2cget(6, paramY),i2cget(6, paramZ));
 
                 if (sendto(s, buf, BUFLEN, 0, &si_other, slen)==-1){
                     diep("sendto()");
@@ -376,7 +416,7 @@ int main(int argc, char *argv[]){
     }
 
     /*
-        On envoi l'heure de la prise de valeur.
+        On envoi les heures de prise de valeur.
     */
     sprintf(buf, "4,%lld,%lld", sending.tv_sec, sending.tv_usec);
     printf("time_s = %lld, time_us = %lld\n", sending.tv_sec, sending.tv_usec);
