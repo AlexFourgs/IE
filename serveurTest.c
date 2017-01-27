@@ -8,6 +8,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+/**
+
+    PROTOCOLE DES MESSAGES
+    1 : Échéances manquées
+    2 : Données de connexion (paquets envoyés, vitesse...)
+    3 : Données accélération, vitesse et déplacement.
+    4 : Heure début enregistrement données
+    5 : Heure fin enregistrement données
+
+**/
+
+
 #define BUFLEN 512
 #define PORT 9930
 
@@ -63,7 +76,7 @@ int main(void){
   if(fichier==NULL){
     printf("Error can't open or create file  \n");
     exit(1);
-}
+  }
 
 
   memset((char *) &si_me, 0, sizeof(si_me));

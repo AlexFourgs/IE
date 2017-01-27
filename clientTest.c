@@ -260,6 +260,17 @@ void diep(char *s)
       int sumAccZ = 0 ;
       float g = 0 ;
 
+      printf("Attention, calibration du gumstix, posez le gumstix sur une surface plane et ne le touchais pas.\n");
+      printf("Calibration dans...\n");
+      for(i=0 ; i < 5 ; i++){
+          printf("%d...\n", 5-i);
+          sleep(1);
+      }
+
+      i=0 ;
+
+      printf("Calibration en cours.\n");
+
       for(i = 0 ; i < 64 ; i++){
           accZ = i2cget(6, paramZ);
 
@@ -272,8 +283,36 @@ void diep(char *s)
 
       g = sumAccZ/64 ;
 
+      printf("Calibration terminée.\n");
       return g ;
   }
+
+
+void message_wait(){
+    int i = 0 ;
+
+    printf("Enregistrement des données dans...\n");
+    for(i=0 ; i < 5 ; i++){
+        printf("%d...\n", 5-i);
+        sleep(1);
+    }
+
+}
+
+void starting_record_time_send(){
+    struct timeval start_record;
+    char buf[BUFLEN];
+
+    gettimeofday(&start_record, 0);
+
+    /*envoi des informations*/
+    sprintf(buf, "4,%llf\n", start_record);
+    //printf ("%d %d %d \n",i2cget(6, paramX),i2cget(6, paramY),i2cget(6, paramZ));
+
+    if (sendto(s, buf, BUFLEN, 0, &si_other, slen)==-1){
+        diep("sendto()");
+    }
+}
 
 int main(int argc, char *argv[]){
     // Attributs pour le client UDP
@@ -330,6 +369,8 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
+    message_wait();
+    printf("Enregistrement des données.\n");
 	/* on récupère le temps avant de rentrer dans la boucle*/
     gettimeofday(&start, 0);
     gettimeofday(&sending, 0);
@@ -397,6 +438,9 @@ int main(int argc, char *argv[]){
             }
         }
     }
+
+    printf("Enregistrement des données terminé.\n");
+    printf("Envoi des données de la connexion au serveur.\n");
 
     /*
         On envoie les échéances manquées
