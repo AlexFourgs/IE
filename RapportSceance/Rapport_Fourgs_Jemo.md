@@ -42,7 +42,7 @@ Le serveur compte le nombre de paquet reçu aussi.
 
 Voici les résultats obtenus :
 
-<img src="https://github.com/AlexFourgs/IE/raw/master/RapportSceance/courbeie.png" width="300">
+<img src="https://github.com/AlexFourgs/IE/raw/master/RapportSceance/courbeie.png">
 
 Commentaires sur la courbe
 
